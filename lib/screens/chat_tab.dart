@@ -358,9 +358,9 @@ class _ChatTabState extends State<ChatTab> {
                     height: 32,
                     decoration: BoxDecoration(
                       color: isActive
-                          ? AppColors.green.withOpacity(0.15)
+                          ? AppColors.green.withValues(alpha: 0.15)
                           : isLoading
-                          ? AppColors.orange.withOpacity(0.15)
+                          ? AppColors.orange.withValues(alpha: 0.15)
                           : context.bgHover,
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -538,7 +538,7 @@ class _ChatTabState extends State<ChatTab> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(context.isDark ? 0.15 : 0.04),
+              color: Colors.black.withValues(alpha: context.isDark ? 0.15 : 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

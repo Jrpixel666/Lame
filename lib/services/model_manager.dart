@@ -69,7 +69,7 @@ class ModelManager extends GetxService {
           for (var i = 0; i < dirs.length; i++) {
             final label = i == 0
                 ? 'Shared Storage'
-                : (dirs.length > 2 ? 'SD Card ${i}' : 'SD Card');
+                : (dirs.length > 2 ? 'SD Card $i' : 'SD Card');
             locations.add(StorageLocation(
               label: label,
               path: p.join(dirs[i].path, 'PortableAI', 'models'),

@@ -210,7 +210,7 @@ class _HuggingFaceSearchScreenState extends State<HuggingFaceSearchScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.12),
+                      color: AppColors.accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.smart_toy_outlined,

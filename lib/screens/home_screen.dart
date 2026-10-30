@@ -325,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onDestinationSelected: (i) => setState(() => _mobileTabIndex = i),
           backgroundColor: Colors.transparent,
           elevation: 0,
-          indicatorColor: AppColors.accent.withOpacity(0.15),
+          indicatorColor: AppColors.accent.withValues(alpha: 0.15),
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           height: 64,
           destinations: [
@@ -426,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: context.bgHover.withOpacity(0.5),
+        color: context.bgHover.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -513,7 +513,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: context.bgHover.withOpacity(0.5),
+                  color: context.bgHover.withValues(alpha: 0.5),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

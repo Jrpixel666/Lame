@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:llamadart/llamadart.dart';
 import 'package:path/path.dart' as p;
@@ -180,6 +179,7 @@ class LlmService extends GetxService {
 
       log?.info('Backend=$parsedBackend, GPU layers=$userGpuLayers, ctx=$contextSize, threads=${Platform.numberOfProcessors > 4 ? 4 : 0}', source: 'LLM');
 
+      // ignore: deprecated_member_use
       await _engine!.loadModel(path, modelParams: params);
       progressTimer.cancel();
 
