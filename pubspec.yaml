@@ -38,7 +38,8 @@ dependencies:
   # ── Background / Wake Lock ─────────────────────────────────────
   wakelock_plus: ^1.8.2              # Keep screen on during downloads
   flutter_foreground_task: ^11.0.3   # Foreground service for downloads/inference
-  disable_battery_optimization: ^1.1.2 # Guide users to disable battery optimization
+  # Battery-optimization prompt is implemented natively (MainActivity.kt) —
+  # see CONTRIBUTING.md for why disable_battery_optimization was dropped.
 
 dev_dependencies:
   flutter_test:

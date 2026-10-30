@@ -57,11 +57,15 @@ Two exceptions worth knowing about:
   version that `hive_generator` 2.0.1 can't resolve against (confirmed by CI's `flutter pub get`
   failing on every later build_runner we tried). Don't bump this one without also replacing
   `hive_generator`, since no newer `hive_generator` release exists to lift the cap.
-- The Gradle wrapper is pinned to the `8.x` line (currently 8.14.6), not Gradle 9. Two unrelated
-  things break on Gradle 9 in this project: AGP 8.13.x calls a Gradle-internal API Gradle 9.6
-  removed, and the `disable_battery_optimization` plugin's bundled `build.gradle` still calls
-  `jcenter()`, which Gradle 9 dropped entirely (that plugin has had no release since 1.1.2 and
-  likely never will). Moving to Gradle 9 means dropping or replacing that plugin first.
+- The Gradle wrapper is pinned to the `8.x` line (currently 8.14.6), not Gradle 9 — AGP 8.13.x
+  calls a Gradle-internal API that Gradle 9.6 removed. Moving to Gradle 9 also means moving to
+  AGP 9.x, which needs its own DSL migration in the `android/**/build.gradle.kts` files (see the
+  comment in `android/settings.gradle.kts`).
+- `disable_battery_optimization` was dropped entirely (not just version-pinned) — the package has
+  had no release since 1.1.2 and its bundled `build.gradle` both calls the long-removed
+  `jcenter()` and hard-codes `compileSdk 31`, which modern AndroidX transitive dependencies
+  reject outright. The battery-optimization prompt in Settings now talks to a small native
+  MethodChannel implemented directly in `MainActivity.kt` instead.
 
 ## Reporting bugs / requesting features
 
