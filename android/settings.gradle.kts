@@ -22,10 +22,12 @@ plugins {
     // AGP 9.x defaults to a new `android {}` DSL (android.newDsl=true) that
     // this project's build.gradle.kts files don't use yet — AGP 9.3.1
     // failed a real CI build with "Script compilation errors" on the old
-    // `android { ... kotlinOptions { ... } }` syntax. Staying on the
-    // newest 8.x release (which still defaults to the classic DSL) until
-    // those files are migrated. Kotlin 2.4.21 + Gradle 9.7.0 (wrapper)
-    // are unaffected and stay as the newest mutually-compatible versions.
+    // `android { ... }` syntax. Staying on the newest 8.x release (which
+    // still defaults to the classic DSL) until those files are migrated.
+    // AGP 8.13.2 itself has a hard ceiling of Gradle <9.6.0 (it calls a
+    // Gradle-internal API removed in 9.6) — see gradle-wrapper.properties,
+    // pinned to 9.5.0 for exactly that reason. Kotlin 2.4.21 is compatible
+    // across this whole range per kotlinlang.org's own matrix.
     id("com.android.application") version "8.13.2" apply false
     id("org.jetbrains.kotlin.android") version "2.4.21" apply false
 }
