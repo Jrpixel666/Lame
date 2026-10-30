@@ -7,6 +7,10 @@
 
   [Overview](#overview) · [Download](#download) · [Features](#features) · [Quick Start](#quick-start) · [Local API](#local-api-server) · [Roadmap](#roadmap)
 
+  [![CI](https://github.com/Jrpixel666/Lame/actions/workflows/ci.yml/badge.svg)](https://github.com/Jrpixel666/Lame/actions/workflows/ci.yml)
+  [![Release](https://github.com/Jrpixel666/Lame/actions/workflows/release.yml/badge.svg)](https://github.com/Jrpixel666/Lame/actions/workflows/release.yml)
+  [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 </div>
 
 ---
@@ -28,6 +32,11 @@ No API keys. No subscriptions. No content restrictions. Your conversations never
 ---
 
 ## Download
+
+> The APKs below are the last release published by the upstream project this fork started from.
+> Once this fork cuts its own [release](https://github.com/Jrpixel666/Lame/releases), prebuilt
+> artifacts for Android, Linux, Windows and macOS will be attached there automatically by the
+> [release workflow](.github/workflows/release.yml).
 
 ### Android APK — Latest Release (v2.0.0)
 
@@ -95,8 +104,8 @@ No API keys. No subscriptions. No content restrictions. Your conversations never
 **Prerequisites:** Mac with Xcode 15+ · [Flutter SDK](https://flutter.dev/docs/get-started/install)
 
 ```bash
-git clone https://github.com/techjarves/Uncensored-Local-AI-Multiplatform.git
-cd Uncensored-Local-AI-Multiplatform
+git clone https://github.com/Jrpixel666/Lame.git
+cd Lame
 flutter pub get
 cd ios && pod install && cd ..
 flutter build ios --release
@@ -108,8 +117,8 @@ flutter build ios --release
 To build and run the app on Android entirely on your own machine (no cloud CI):
 
 ```bash
-git clone https://github.com/techjarves/Uncensored-Local-AI-Multiplatform.git
-cd Uncensored-Local-AI-Multiplatform
+git clone https://github.com/Jrpixel666/Lame.git
+cd Lame
 
 scripts/check_android_dev_env.sh   # see what's missing (Flutter/Java/Android SDK)
 scripts/setup_android_dev.sh       # install instructions + flutter pub get + flutter doctor
@@ -129,13 +138,13 @@ tools for debugging a local build without needing `adb logcat`.
 > Desktop builds compile successfully but may have rough edges. **We are actively looking for contributors** to help test and polish the desktop experience.
 
 ```bash
-git clone https://github.com/techjarves/Uncensored-Local-AI-Multiplatform.git
-cd Uncensored-Local-AI-Multiplatform
+git clone https://github.com/Jrpixel666/Lame.git
+cd Lame
 flutter pub get
 flutter run -d windows   # or macos / linux
 ```
 
-If you encounter issues on desktop, please [open an issue](https://github.com/techjarves/Uncensored-Local-AI-Multiplatform/issues) — your feedback directly shapes the roadmap.
+If you encounter issues on desktop, please [open an issue](https://github.com/Jrpixel666/Lame/issues) — your feedback directly shapes the roadmap.
 
 ---
 
@@ -204,7 +213,9 @@ curl -N http://127.0.0.1:4891/v1/chat/completions \
 
 ## Contributing
 
-All contributions are welcome — and we especially need help from the community in these areas:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, the dev workflow, and what CI checks on
+every PR. All contributions are welcome — and we especially need help from the community in these
+areas:
 
 | Area | What's Needed |
 |------|---------------|
