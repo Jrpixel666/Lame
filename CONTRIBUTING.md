@@ -47,10 +47,16 @@ git push origin fix/short-description
 Dependabot opens weekly PRs for pub, Gradle, and GitHub Actions updates — review and merge those
 rather than bumping versions by hand where possible.
 
-One exception worth knowing about: `flutter_markdown` (used to render AI responses) was marked
-**discontinued** on pub.dev by the Flutter team. It still works and we're pinned to its latest
-published version, but if you're picking up new markdown work, consider whether a community fork
-or an alternative package should replace it first.
+Two exceptions worth knowing about:
+
+- `flutter_markdown` (used to render AI responses) was marked **discontinued** on pub.dev by the
+  Flutter team. It still works and we're pinned to its latest published version, but if you're
+  picking up new markdown work, consider whether a community fork or an alternative package
+  should replace it first.
+- `build_runner` is pinned to `^2.4.13` on purpose — anything newer pulls in an `analyzer`/`macros`
+  version that `hive_generator` 2.0.1 can't resolve against (confirmed by CI's `flutter pub get`
+  failing on every later build_runner we tried). Don't bump this one without also replacing
+  `hive_generator`, since no newer `hive_generator` release exists to lift the cap.
 
 ## Reporting bugs / requesting features
 
