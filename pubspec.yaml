@@ -1,7 +1,7 @@
 name: portable_ai_flutter
 description: "Portable AI — Run uncensored local LLMs natively on any device."
 publish_to: 'none'
-version: 1.2.1+4
+version: 1.2.2+5
 
 environment:
   sdk: ^3.11.4
@@ -60,13 +60,17 @@ hooks:
       # on devices whose Settings → Hardware Configuration picks opencl.
       llamadart_native_runtimes: [llama_cpp]
       # GPU backend .so/.dll files to bundle per platform. cpu is always
-      # included; vulkan/opencl must be requested explicitly or they're left
-      # out and selecting them at runtime fails instead of falling back.
+      # included; other backends must be requested explicitly or they're
+      # left out and selecting them at runtime fails instead of falling back.
+      # OpenCL on android-arm64 is deliberately NOT requested — confirmed on
+      # a real device to fail loading (libggml-opencl.so / ggml_backend_load
+      # returns null) regardless of this hook, so there's no point bundling
+      # a backend that can't be used. Vulkan is the supported Android GPU path.
       llamadart_native_backends:
         platforms:
           linux-x64: [vulkan]
           windows-x64: [vulkan]
-          android-arm64: [cpu, vulkan, opencl]
+          android-arm64: [cpu, vulkan]
 
 flutter:
   uses-material-design: true

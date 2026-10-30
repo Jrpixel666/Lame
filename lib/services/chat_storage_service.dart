@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 
@@ -120,8 +122,14 @@ class ChatStorageService extends GetxService {
 
   set gpuLayers(int value) => _settingsBox.put('gpu_layers', value);
 
-  String get backendType =>
-      _settingsBox.get('backend_type', defaultValue: 'cpu') as String;
+  String get backendType {
+    final stored = _settingsBox.get('backend_type', defaultValue: 'cpu') as String;
+    // The Android build doesn't bundle an OpenCL backend (it proved
+    // unreliable across devices) — self-heal anyone whose preference was
+    // saved before that, instead of letting every load fail forever.
+    if (Platform.isAndroid && stored == 'opencl') return 'cpu';
+    return stored;
+  }
 
   set backendType(String value) => _settingsBox.put('backend_type', value);
 

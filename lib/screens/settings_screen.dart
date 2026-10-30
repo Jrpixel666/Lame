@@ -694,7 +694,7 @@ class _SettingsBody extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'Uncensored Local AI v1.2.1',
+                      'Uncensored Local AI v1.2.2',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -817,31 +817,17 @@ class _HardwareSettingsCardState extends State<_HardwareSettingsCard> {
       return {'backend': 'cpu', 'gpuLayers': 0, 'reason': 'CPU mode — most compatible on desktop'};
     }
 
-    // Android/iOS: detect available RAM and processor count
+    // Android/iOS: CPU is the only backend confirmed reliable across real
+    // devices (GPU backends have shown device-specific native loading
+    // failures) — recommend it regardless of core count. GPU backends are
+    // still available below under Manual Override for anyone who wants to
+    // try one on their specific hardware.
     final cores = Platform.numberOfProcessors;
-    
-    if (cores >= 8) {
-      // High-end device (e.g. Snapdragon 8 Gen 2+, Dimensity 9000+)
-      return {
-        'backend': 'opencl',
-        'gpuLayers': 33,
-        'reason': 'OpenCL GPU — best for high-end SoC ($cores cores detected)',
-      };
-    } else if (cores >= 6) {
-      // Mid-range device
-      return {
-        'backend': 'cpu',
-        'gpuLayers': 0,
-        'reason': 'CPU mode — safe for mid-range devices ($cores cores)',
-      };
-    } else {
-      // Low-end device
-      return {
-        'backend': 'cpu',
-        'gpuLayers': 0,
-        'reason': 'CPU mode — optimized for lower-end devices ($cores cores)',
-      };
-    }
+    return {
+      'backend': 'cpu',
+      'gpuLayers': 0,
+      'reason': 'CPU mode — most reliable across devices ($cores cores detected)',
+    };
   }
 
   @override
@@ -889,8 +875,6 @@ class _HardwareSettingsCardState extends State<_HardwareSettingsCard> {
     switch (_backend) {
       case 'vulkan':
         return 'GPU (Vulkan) • ${_gpuLayers.toInt()} layers';
-      case 'opencl':
-        return 'GPU (OpenCL) • ${_gpuLayers.toInt()} layers';
       default:
         return 'CPU Only';
     }
@@ -1001,8 +985,6 @@ class _HardwareSettingsCardState extends State<_HardwareSettingsCard> {
                 _buildBackendButton('CPU', 'cpu'),
                 const SizedBox(width: 8),
                 _buildBackendButton('Vulkan', 'vulkan'),
-                const SizedBox(width: 8),
-                _buildBackendButton('OpenCL', 'opencl'),
               ],
             ),
             const SizedBox(height: 16),

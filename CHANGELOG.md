@@ -36,6 +36,21 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.2] - 2026-10-30
+
+### Fixed
+- **Android model loading, take two**: 1.2.1's CPU-fallback retry didn't actually clear the bug on
+  a real device — OpenCL confirmed broken (`ggml_backend_load` returns null for
+  `libggml-opencl.so`) regardless of whether the hook requests it. Stopped bundling OpenCL on
+  Android entirely rather than continuing to chase why it fails. `ChatStorageService.backendType`
+  now also self-heals: a device with `opencl` already saved from before this fix reads back as
+  `cpu` automatically, no user action needed. The Hardware Configuration auto-detect and manual
+  picker no longer offer OpenCL, and no longer auto-recommend Vulkan either — only CPU, the one
+  backend actually confirmed working, until a real device confirms Vulkan is safe to recommend by
+  default too.
+
+---
+
 ## [1.2.1] - 2026-10-30
 
 ### Fixed
