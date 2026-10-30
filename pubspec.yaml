@@ -44,7 +44,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: ^2.0.1           # Hive type adapter code gen
-  build_runner: ^2.17.1            # Code generation runner
+  build_runner: ^2.5.4              # Code generation runner — capped by hive_generator's analyzer <7.0.0 constraint
   flutter_lints: ^6.0.0
 
 hooks:
