@@ -40,6 +40,7 @@ Future<void> main() async {
     Hive.registerAdapter(ChatModelAdapter());
     Hive.registerAdapter(MessageModelAdapter());
     Hive.registerAdapter(MessageRoleAdapter());
+    Hive.registerAdapter(ChatModeAdapter());
 
     // Open Hive boxes
     await Hive.openBox<ChatModel>('chats');

@@ -6,6 +6,8 @@ import '../screens/model_library_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/api_endpoints_screen.dart';
 import '../screens/logs_screen.dart';
+import '../screens/huggingface_search_screen.dart';
+import '../screens/device_scan_screen.dart';
 
 class AppRoutes {
   static const splash = '/splash';
@@ -14,6 +16,8 @@ class AppRoutes {
   static const settings = '/settings';
   static const apiEndpoints = '/api-endpoints';
   static const logs = '/logs';
+  static const huggingFaceSearch = '/hf-search';
+  static const deviceScan = '/device-scan';
 
   static final pages = [
     GetPage(name: splash, page: () => const SplashScreen()),
@@ -36,6 +40,16 @@ class AppRoutes {
     GetPage(
       name: logs,
       page: () => const LogsScreen(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: huggingFaceSearch,
+      page: () => const HuggingFaceSearchScreen(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: deviceScan,
+      page: () => const DeviceScanScreen(),
       transition: Transition.rightToLeft,
     ),
   ];

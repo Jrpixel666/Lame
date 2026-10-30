@@ -3,12 +3,15 @@ import 'package:get/get.dart';
 
 import '../theme/app_colors.dart';
 import '../controllers/chat_controller.dart';
+import '../models/chat_model.dart';
 
 class ChatSidebar extends StatelessWidget {
   final VoidCallback onNewChat;
   final ValueChanged<String> onSelectChat;
   final ValueChanged<String> onDeleteChat;
   final bool showNewChatButton;
+  /// Restrict the list to chats of this mode. If null, shows every chat.
+  final ChatMode? mode;
 
   const ChatSidebar({
     super.key,
@@ -16,6 +19,7 @@ class ChatSidebar extends StatelessWidget {
     required this.onSelectChat,
     required this.onDeleteChat,
     this.showNewChatButton = true,
+    this.mode,
   });
 
   @override
@@ -55,7 +59,8 @@ class ChatSidebar extends StatelessWidget {
         // Chat list
         Expanded(
           child: Obx(() {
-            final chats = ctrl.chats;
+            final chats =
+                mode == null ? ctrl.chats.toList() : ctrl.chatsForMode(mode!);
             if (chats.isEmpty) {
               return Center(
                 child: Column(

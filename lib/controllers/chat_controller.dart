@@ -40,11 +40,26 @@ class ChatController extends GetxController {
     }
   }
 
+  /// The active chat, but only if it belongs to [mode]. Used so the Chat
+  /// and Development screens never show each other's conversation.
+  ChatModel? activeChatFor(ChatMode mode) {
+    final chat = activeChat;
+    return (chat != null && chat.mode == mode) ? chat : null;
+  }
+
+  /// All chats belonging to a given screen (Chat or Development), newest first.
+  List<ChatModel> chatsForMode(ChatMode mode) =>
+      chats.where((c) => c.mode == mode).toList();
+
   /// Create a new chat and switch to it.
-  void newChat() {
+  void newChat({ChatMode mode = ChatMode.chat}) {
+    final prompt = mode == ChatMode.development
+        ? _storage.developmentSystemPrompt
+        : systemPrompt.value;
     final chat = ChatModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      systemPrompt: systemPrompt.value,
+      systemPrompt: prompt,
+      mode: mode,
     );
     chats.insert(0, chat);
     _storage.saveChat(chat);

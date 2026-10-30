@@ -3,6 +3,16 @@ import 'message_model.dart';
 
 part 'chat_model.g.dart';
 
+/// Which screen a chat belongs to — each has its own history list and
+/// its own default system prompt/persona.
+@HiveType(typeId: 3)
+enum ChatMode {
+  @HiveField(0)
+  chat,
+  @HiveField(1)
+  development,
+}
+
 @HiveType(typeId: 0)
 class ChatModel extends HiveObject {
   @HiveField(0)
@@ -26,6 +36,9 @@ class ChatModel extends HiveObject {
   @HiveField(6)
   DateTime updatedAt;
 
+  @HiveField(7)
+  ChatMode mode;
+
   ChatModel({
     required this.id,
     this.title = 'New Chat',
@@ -34,6 +47,7 @@ class ChatModel extends HiveObject {
     List<MessageModel>? messages,
     DateTime? createdAt,
     DateTime? updatedAt,
+    this.mode = ChatMode.chat,
   })  : messages = messages ?? [],
         createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();

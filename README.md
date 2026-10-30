@@ -59,6 +59,11 @@ No API keys. No subscriptions. No content restrictions. Your conversations never
 | **Model Library** | Download, import, and manage GGUF models directly in the app |
 | **Chat History** | Persistent conversation history stored locally via Hive |
 | **Live Metrics** | Real-time tokens/sec and loading progress tracking |
+| **Two Chat Screens** | Separate *Chat* and *Development* screens, each with its own history and a persona tuned for the job (general conversation vs. coding/debugging) |
+| **Hugging Face Search** | Search huggingface.co for GGUF repos from inside the app and add a quantization straight to your library |
+| **Device Scan** | Detects this device's RAM/CPU/storage and flags which catalog models will actually fit |
+
+
 
 ---
 
@@ -97,6 +102,27 @@ cd ios && pod install && cd ..
 flutter build ios --release
 # Open ios/Runner.xcworkspace in Xcode and archive to deploy
 ```
+
+### Local Android Development
+
+To build and run the app on Android entirely on your own machine (no cloud CI):
+
+```bash
+git clone https://github.com/techjarves/Uncensored-Local-AI-Multiplatform.git
+cd Uncensored-Local-AI-Multiplatform
+
+scripts/check_android_dev_env.sh   # see what's missing (Flutter/Java/Android SDK)
+scripts/setup_android_dev.sh       # install instructions + flutter pub get + flutter doctor
+scripts/run_android_local.sh       # debug build, installs on a connected device/emulator
+scripts/run_android_local.sh release  # release APK -> build/app/outputs/flutter-apk/
+```
+
+Prerequisites these scripts check for: [Flutter SDK](https://flutter.dev/docs/get-started/install), a JDK 17
+(matching `android/app/build.gradle.kts`), and an Android SDK (easiest via
+[Android Studio](https://developer.android.com/studio)) with `ANDROID_HOME` set.
+
+In-app, **Settings → App Logs** and the **Local API Server** panel double as developer
+tools for debugging a local build without needing `adb logcat`.
 
 ### Desktop — Windows / macOS / Linux (Community Supported)
 
@@ -166,6 +192,9 @@ curl -N http://127.0.0.1:4891/v1/chat/completions \
 | Local OpenAI-compatible API server | **Launched** |
 | Custom model import (URL + file) | **Launched** |
 | Multi-platform support | **Launched** |
+| Separate Chat / Development screens | **Launched** |
+| Hugging Face model search | **Launched** |
+| Device capability scan | **Launched** |
 | AI Agent Mode | In Progress |
 | Web search integration | Planned |
 | Voice interaction | Planned |

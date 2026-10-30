@@ -7,6 +7,7 @@ import '../controllers/model_controller.dart';
 import '../services/model_manager.dart';
 import '../models/ai_model_info.dart';
 import '../widgets/model_card.dart';
+import '../routes/app_routes.dart';
 
 class ModelLibraryScreen extends StatelessWidget {
   final bool embedded;
@@ -76,6 +77,16 @@ class _ModelLibraryBodyState extends State<_ModelLibraryBody> {
                   ),
                 ),
                 const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.memory_rounded, color: context.textM, size: 20),
+                  tooltip: 'Scan My Device',
+                  onPressed: () => Get.toNamed(AppRoutes.deviceScan),
+                ),
+                IconButton(
+                  icon: Icon(Icons.travel_explore_rounded, color: context.textM, size: 20),
+                  tooltip: 'Search Hugging Face',
+                  onPressed: () => Get.toNamed(AppRoutes.huggingFaceSearch),
+                ),
                 _ImportButton(ctrl: ctrl),
                 const SizedBox(width: 8),
               ],
