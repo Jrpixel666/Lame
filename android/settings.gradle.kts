@@ -24,10 +24,13 @@ plugins {
     // failed a real CI build with "Script compilation errors" on the old
     // `android { ... }` syntax. Staying on the newest 8.x release (which
     // still defaults to the classic DSL) until those files are migrated.
-    // AGP 8.13.2 itself has a hard ceiling of Gradle <9.6.0 (it calls a
-    // Gradle-internal API removed in 9.6) — see gradle-wrapper.properties,
-    // pinned to 9.5.0 for exactly that reason. Kotlin 2.4.21 is compatible
-    // across this whole range per kotlinlang.org's own matrix.
+    // Gradle is capped at the 8.x line (see gradle-wrapper.properties) for
+    // two independent reasons hit back-to-back in CI: AGP 8.13.2 calls a
+    // Gradle-internal API removed in Gradle 9.6, AND the
+    // disable_battery_optimization plugin's own build.gradle still calls
+    // the long-removed jcenter() repository method, which Gradle 9.x
+    // dropped entirely. Kotlin 2.4.21 is compatible across this whole
+    // range per kotlinlang.org's own matrix.
     id("com.android.application") version "8.13.2" apply false
     id("org.jetbrains.kotlin.android") version "2.4.21" apply false
 }
