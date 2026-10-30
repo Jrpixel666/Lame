@@ -19,12 +19,14 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    // AGP 9.3.1 + Kotlin 2.4.21 + Gradle 9.7.0 (wrapper) is the newest
-    // mutually-verified combination per Kotlin's own compatibility matrix
-    // (kotlinlang.org/docs/gradle-configure-project.html): KGP 2.4.21
-    // supports AGP up to 9.3.1 and Gradle up to 9.7.0. AGP 9.5.0+Kotlin
-    // 2.4.21 would likely also work but falls outside that tested matrix.
-    id("com.android.application") version "9.3.1" apply false
+    // AGP 9.x defaults to a new `android {}` DSL (android.newDsl=true) that
+    // this project's build.gradle.kts files don't use yet — AGP 9.3.1
+    // failed a real CI build with "Script compilation errors" on the old
+    // `android { ... kotlinOptions { ... } }` syntax. Staying on the
+    // newest 8.x release (which still defaults to the classic DSL) until
+    // those files are migrated. Kotlin 2.4.21 + Gradle 9.7.0 (wrapper)
+    // are unaffected and stay as the newest mutually-compatible versions.
+    id("com.android.application") version "8.13.2" apply false
     id("org.jetbrains.kotlin.android") version "2.4.21" apply false
 }
 
