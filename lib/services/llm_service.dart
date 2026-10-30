@@ -169,18 +169,52 @@ class LlmService extends GetxService {
       final userGpuLayers = storage.gpuLayers;
 
       // Optimize threads: 4 for both generation and batch processing to keep memory stable.
+      final threads = Platform.numberOfProcessors > 4 ? 4 : 0;
       final params = ModelParams(
         contextSize: contextSize,
-        gpuLayers: userGpuLayers, 
+        gpuLayers: userGpuLayers,
         preferredBackend: parsedBackend,
-        numberOfThreads: Platform.numberOfProcessors > 4 ? 4 : 0, 
-        numberOfThreadsBatch: Platform.numberOfProcessors > 4 ? 4 : 0,
+        numberOfThreads: threads,
+        numberOfThreadsBatch: threads,
       );
 
-      log?.info('Backend=$parsedBackend, GPU layers=$userGpuLayers, ctx=$contextSize, threads=${Platform.numberOfProcessors > 4 ? 4 : 0}', source: 'LLM');
+      log?.info('Backend=$parsedBackend, GPU layers=$userGpuLayers, ctx=$contextSize, threads=$threads', source: 'LLM');
 
-      // ignore: deprecated_member_use
-      await _engine!.loadModel(path, modelParams: params);
+      try {
+        // ignore: deprecated_member_use
+        await _engine!.loadModel(path, modelParams: params);
+      } catch (e) {
+        // The APK may not bundle every GPU backend's native module (e.g. a
+        // build without OpenCL) even though the engine reports the device
+        // as capable. Rather than fail outright, fall back to CPU once and
+        // remember the choice so future loads don't repeat this failure.
+        final msg = e.toString().toLowerCase();
+        final backendUnavailable = msg.contains('backend module') ||
+            msg.contains('not loaded from any candidate') ||
+            msg.contains('ggml_backend_load');
+        if (!backendUnavailable || parsedBackend == GpuBackend.cpu) rethrow;
+
+        log?.error(
+          'Backend $parsedBackend unavailable in this build, retrying on CPU: $e',
+          source: 'LLM',
+        );
+        storage.backendType = 'cpu';
+        storage.gpuLayers = 0;
+
+        await _fullTeardown();
+        _backend = LlamaBackend();
+        _engine = LlamaEngine(_backend!);
+
+        final cpuParams = ModelParams(
+          contextSize: contextSize,
+          gpuLayers: 0,
+          preferredBackend: GpuBackend.cpu,
+          numberOfThreads: threads,
+          numberOfThreadsBatch: threads,
+        );
+        // ignore: deprecated_member_use
+        await _engine!.loadModel(path, modelParams: cpuParams);
+      }
       progressTimer.cancel();
 
       if (_loadingCancelled) {

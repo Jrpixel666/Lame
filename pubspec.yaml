@@ -1,7 +1,7 @@
 name: portable_ai_flutter
 description: "Portable AI — Run uncensored local LLMs natively on any device."
 publish_to: 'none'
-version: 1.2.0+3
+version: 1.2.1+4
 
 environment:
   sdk: ^3.11.4
@@ -53,9 +53,20 @@ hooks:
     llamadart:
       # Only bundle the llama.cpp/GGUF runtime this app actually uses —
       # skips LiteRT-LM and Stable Diffusion to keep native binary size down.
-      # (Replaces the pre-0.11 `llamadart_native_backends.platforms` key,
-      # which llamadart no longer reads.)
+      # This is a SEPARATE, complementary key from llamadart_native_backends
+      # below (one picks the runtime, the other picks GPU backends) — do not
+      # drop the backends key again thinking this one replaces it; that
+      # silently removed OpenCL from Android builds and broke model loading
+      # on devices whose Settings → Hardware Configuration picks opencl.
       llamadart_native_runtimes: [llama_cpp]
+      # GPU backend .so/.dll files to bundle per platform. cpu is always
+      # included; vulkan/opencl must be requested explicitly or they're left
+      # out and selecting them at runtime fails instead of falling back.
+      llamadart_native_backends:
+        platforms:
+          linux-x64: [vulkan]
+          windows-x64: [vulkan]
+          android-arm64: [cpu, vulkan, opencl]
 
 flutter:
   uses-material-design: true

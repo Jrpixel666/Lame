@@ -26,15 +26,27 @@ All notable changes to this project will be documented in this file.
 - Upgraded every dependency to its latest version, each checked against its own changelog/docs
   for breaking changes first — most notably `llamadart` (0.6.10 → 0.17.0, the inference engine)
   and `file_picker` (8.1.7 → 13.3.0, whose API changed and required code updates). Android
-  toolchain bumped to AGP 9.3.1 / Kotlin 2.4.21 / Gradle 9.7.0 (the newest mutually-compatible
-  combination, not independently-latest versions that don't support each other).
+  toolchain settled at AGP 8.13.2 / Kotlin 2.4.21 / Gradle 8.14.6 after CI caught three
+  independent build breaks from going further (see 1.2.1 below and `CONTRIBUTING.md`).
 
 ### Fixed
 - `file_picker` 13.x API migration: `FilePicker.platform` singleton removed, `pickFiles()` no
   longer wraps results in `FilePickerResult`, and `PlatformFile.size` replaced by an async
   `length()` — all updated in the model import flow.
-- `llamadart`'s native-backend hook key (`llamadart_native_backends.platforms`) was replaced
-  upstream; updated to the current `llamadart_native_runtimes` key.
+
+---
+
+## [1.2.1] - 2026-10-30
+
+### Fixed
+- **Android model loading crash**: 1.2.0 dropped the `llamadart_native_backends.platforms` hook
+  key, wrongly believing `llamadart_native_runtimes` had replaced it — the two are separate,
+  complementary keys (one picks the GGUF/LiteRT runtime, the other picks which GPU backend `.so`
+  files get bundled). Without it, Android builds stopped bundling the OpenCL and Vulkan backends,
+  so a device whose Settings → Hardware Configuration auto-detected OpenCL would fail to load any
+  model at all (`Backend module 'opencl' not loaded from any candidate`). Restored the key.
+- `LlmService.loadModel` now catches that specific failure class and falls back to CPU once,
+  persisting the fallback so it doesn't recur, instead of surfacing a raw native error.
 
 ---
 
