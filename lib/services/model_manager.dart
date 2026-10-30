@@ -11,12 +11,28 @@ import 'package:path/path.dart' as p;
 import '../models/ai_model_info.dart';
 import '../models/download_state.dart';
 import 'wakelock_service.dart';
+import 'chat_storage_service.dart';
+
+/// A place models can be saved to — the app's private internal storage,
+/// or (on Android) shared/removable storage such as an SD card.
+class StorageLocation {
+  final String label;
+  final String path;
+  const StorageLocation({required this.label, required this.path});
+}
 
 /// Manages model catalog, downloads, and local file discovery.
 class ModelManager extends GetxService {
+  final ChatStorageService _storage = Get.find<ChatStorageService>();
+
   final catalog = <AiModelInfo>[].obs;
   final downloadedModels = <String>[].obs; // filenames on-disk (list for reactivity)
-  
+
+  // ── Storage locations (internal + SD card) ──────────────────
+  final storageLocations = <StorageLocation>[].obs;
+  final activeStorageLabel = ''.obs;
+  final Map<String, String> _fileDirs = {}; // filename -> directory it was found in
+
   // ── Download tracking (single reactive object) ─────────────
   final activeDownloads = <String, DownloadState>{}.obs;
   final tick = 0.obs; // force UI refresh counter
@@ -25,20 +41,58 @@ class ModelManager extends GetxService {
   late String _modelsDir;
 
   Future<ModelManager> init() async {
-    _modelsDir = await _getModelsDir();
+    await _discoverStorageLocations();
+    _modelsDir = await _resolveActiveModelsDir();
     await _loadCatalog();
     await scanDownloaded();
     return this;
   }
 
-  /// Resolve models directory.
-  Future<String> _getModelsDir() async {
-    // Only check USB path on desktop platforms
+  /// Find every place models could live: the app's private storage, plus
+  /// (on Android only) shared and removable storage volumes such as an
+  /// inserted SD card, via `getExternalStorageDirectories()` — no special
+  /// storage permission needed since these are the app's own per-volume
+  /// directories under Android's scoped storage model.
+  Future<void> _discoverStorageLocations() async {
+    final locations = <StorageLocation>[];
+
+    final appDir = await getApplicationDocumentsDirectory();
+    locations.add(StorageLocation(
+      label: 'Internal Storage',
+      path: p.join(appDir.path, 'PortableAI', 'models'),
+    ));
+
+    if (Platform.isAndroid) {
+      try {
+        final dirs = await getExternalStorageDirectories();
+        if (dirs != null) {
+          for (var i = 0; i < dirs.length; i++) {
+            final label = i == 0
+                ? 'Shared Storage'
+                : (dirs.length > 2 ? 'SD Card ${i}' : 'SD Card');
+            locations.add(StorageLocation(
+              label: label,
+              path: p.join(dirs[i].path, 'PortableAI', 'models'),
+            ));
+          }
+        }
+      } catch (_) {
+        // getExternalStorageDirectories() unsupported or failed — internal-only is fine.
+      }
+    }
+
+    storageLocations.value = locations;
+  }
+
+  /// Resolve which directory new downloads/imports should go into.
+  Future<String> _resolveActiveModelsDir() async {
+    // Desktop: keep the existing USB-shared-folder convenience check.
     if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
       try {
         final execDir = Platform.resolvedExecutable;
         final usbShared = p.join(p.dirname(p.dirname(execDir)), 'Shared', 'models');
         if (await Directory(usbShared).exists()) {
+          activeStorageLabel.value = 'USB / Shared Folder';
           return usbShared;
         }
       } catch (_) {
@@ -46,11 +100,29 @@ class ModelManager extends GetxService {
       }
     }
 
-    // Fall back to app documents
-    final appDir = await getApplicationDocumentsDirectory();
-    final modelsDir = p.join(appDir.path, 'PortableAI', 'models');
-    await Directory(modelsDir).create(recursive: true);
-    return modelsDir;
+    final savedPath = _storage.modelsStorageDir;
+    var chosen = storageLocations.first;
+    for (final loc in storageLocations) {
+      if (loc.path == savedPath) {
+        chosen = loc;
+        break;
+      }
+    }
+
+    activeStorageLabel.value = chosen.label;
+    await Directory(chosen.path).create(recursive: true);
+    return chosen.path;
+  }
+
+  /// Switch which storage location new downloads/imports are saved to.
+  /// Existing downloads elsewhere stay put and stay usable — [scanDownloaded]
+  /// looks across every known location, not just the active one.
+  Future<void> setActiveStorageLocation(StorageLocation location) async {
+    await Directory(location.path).create(recursive: true);
+    _modelsDir = location.path;
+    activeStorageLabel.value = location.label;
+    _storage.modelsStorageDir = location.path;
+    await scanDownloaded();
   }
 
   String get modelsDir => _modelsDir;
@@ -85,22 +157,35 @@ class ModelManager extends GetxService {
     } catch (_) {}
   }
 
-  /// Scan the models directory for downloaded .gguf files.
+  /// Scan every known storage location (internal + any SD card) for
+  /// downloaded .gguf files, so a model stays visible and loadable
+  /// regardless of which location was active when it was downloaded.
   Future<void> scanDownloaded() async {
-    final dir = Directory(_modelsDir);
-    if (!await dir.exists()) return;
+    final found = <String>{};
+    final dirsToScan = <String>{_modelsDir, ...storageLocations.map((l) => l.path)};
 
-    final files = await dir
-        .list()
-        .where((f) => f is File && f.path.endsWith('.gguf'))
-        .map((f) => p.basename(f.path))
-        .toList();
+    for (final dirPath in dirsToScan) {
+      final dir = Directory(dirPath);
+      if (!await dir.exists()) continue;
 
-    downloadedModels.value = files;
+      final files = await dir
+          .list()
+          .where((f) => f is File && f.path.endsWith('.gguf'))
+          .map((f) => p.basename(f.path))
+          .toList();
+
+      for (final name in files) {
+        found.add(name);
+        _fileDirs[name] = dirPath;
+      }
+    }
+
+    downloadedModels.value = found.toList();
   }
 
-  String getModelPath(AiModelInfo model) => p.join(_modelsDir, model.filename);
-  String getModelPathByFilename(String filename) => p.join(_modelsDir, filename);
+  String getModelPath(AiModelInfo model) => getModelPathByFilename(model.filename);
+  String getModelPathByFilename(String filename) =>
+      p.join(_fileDirs[filename] ?? _modelsDir, filename);
   bool isModelDownloaded(AiModelInfo model) => downloadedModels.contains(model.filename);
 
   /// Is this model currently downloading?
@@ -202,6 +287,7 @@ class ModelManager extends GetxService {
       if (!state.isCancelled) {
         // Rename .part to final
         await partFile.rename(filePath);
+        _fileDirs[model.filename] = _modelsDir;
         if (!downloadedModels.contains(model.filename)) {
           downloadedModels.add(model.filename);
         }
@@ -240,12 +326,14 @@ class ModelManager extends GetxService {
     _notifyUI();
   }
 
-  /// Delete a downloaded model.
+  /// Delete a downloaded model, wherever it actually lives.
   Future<void> deleteModel(String filename) async {
-    final file = File(p.join(_modelsDir, filename));
+    final dir = _fileDirs[filename] ?? _modelsDir;
+    final file = File(p.join(dir, filename));
     if (await file.exists()) {
       await file.delete();
     }
+    _fileDirs.remove(filename);
     downloadedModels.remove(filename);
   }
 
@@ -266,6 +354,7 @@ class ModelManager extends GetxService {
       await sourceFile.delete();
     }
 
+    _fileDirs[filename] = _modelsDir;
     if (!downloadedModels.contains(filename)) {
       downloadedModels.add(filename);
     }
@@ -316,6 +405,7 @@ class ModelManager extends GetxService {
       return;
     }
 
+    _fileDirs[filename] = _modelsDir;
     if (!downloadedModels.contains(filename)) {
       downloadedModels.add(filename);
     }
@@ -368,6 +458,7 @@ class ModelManager extends GetxService {
       }
     }
 
+    _fileDirs[filename] = _modelsDir;
     if (!downloadedModels.contains(filename)) {
       downloadedModels.add(filename);
     }

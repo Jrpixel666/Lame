@@ -535,30 +535,69 @@ class _SettingsBody extends StatelessWidget {
 
               // ── Storage ───────────────────────────────────
               _sectionHeader(context, 'Storage'),
+              const SizedBox(height: 8),
+              Text(
+                'Where new model downloads and imports are saved. Models already '
+                'downloaded elsewhere stay put and keep working.',
+                style: TextStyle(fontSize: 12, color: context.textD),
+              ),
               const SizedBox(height: 12),
               _card(
                 context,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.folder_outlined,
-                        size: 20,
-                        color: context.textM,
+                child: Obx(() {
+                  final locations = modelManager.storageLocations;
+                  if (locations.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        modelManager.modelsDir,
+                        style: TextStyle(fontSize: 13, color: context.text),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          modelManager.modelsDir,
-                          style: TextStyle(fontSize: 13, color: context.text),
-                          maxLines: 2,
+                    );
+                  }
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: locations.map((loc) {
+                      final isActive = modelManager.modelsDir == loc.path;
+                      final isSdCard = loc.label.contains('SD Card');
+                      return ListTile(
+                        leading: Icon(
+                          isSdCard ? Icons.sd_card_rounded : Icons.phone_android_rounded,
+                          color: isActive ? AppColors.accent : context.textM,
+                        ),
+                        title: Text(
+                          loc.label,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                            color: context.text,
+                          ),
+                        ),
+                        subtitle: Text(
+                          loc.path,
+                          style: TextStyle(fontSize: 11, color: context.textD),
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                        trailing: isActive
+                            ? const Icon(Icons.check_circle_rounded, color: AppColors.green, size: 20)
+                            : null,
+                        onTap: isActive
+                            ? null
+                            : () async {
+                                await modelManager.setActiveStorageLocation(loc);
+                                Get.snackbar(
+                                  'Storage Updated',
+                                  'New downloads will be saved to ${loc.label}.',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              },
+                      );
+                    }).toList(),
+                  );
+                }),
               ),
 
               const SizedBox(height: 28),

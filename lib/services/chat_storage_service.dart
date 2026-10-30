@@ -124,4 +124,14 @@ class ChatStorageService extends GetxService {
       _settingsBox.get('backend_type', defaultValue: 'cpu') as String;
 
   set backendType(String value) => _settingsBox.put('backend_type', value);
+
+  // ── Storage Location (internal / SD card) ──────────────────
+
+  /// The chosen directory for new model downloads/imports. Empty string
+  /// means "use the default (first available) location".
+  String get modelsStorageDir =>
+      _settingsBox.get('models_storage_dir', defaultValue: '') as String;
+
+  set modelsStorageDir(String value) =>
+      _settingsBox.put('models_storage_dir', value);
 }
