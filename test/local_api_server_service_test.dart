@@ -46,9 +46,13 @@ void main() {
     }
   });
 
-  test('init starts the localhost server by default', () async {
+  test('init starts the localhost server when previously enabled', () async {
     final port = await _freePort();
-    Get.find<ChatStorageService>().localApiServerPort = port;
+    final storage = Get.find<ChatStorageService>();
+    storage.localApiServerPort = port;
+    // The server is opt-in and off by default (see ChatStorageService.localApiServerEnabled) —
+    // init() only auto-starts it if it was left running last time.
+    storage.localApiServerEnabled = true;
 
     await apiServer.init();
 
