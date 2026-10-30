@@ -42,7 +42,7 @@ jobs:
           cd build/app/outputs/flutter-apk
           mv app-release.apk uncensored-local-ai.apk
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/uncensored-local-ai.apk
@@ -76,7 +76,7 @@ jobs:
           cd build/linux/x64/release/bundle
           zip -r "$GITHUB_WORKSPACE/uncensored-local-ai-linux-x64.zip" .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: linux-bundle
           path: uncensored-local-ai-linux-x64.zip
@@ -103,7 +103,7 @@ jobs:
       - name: Zip bundle
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath uncensored-local-ai-windows-x64.zip
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: windows-bundle
           path: uncensored-local-ai-windows-x64.zip
@@ -132,7 +132,7 @@ jobs:
           cd build/macos/Build/Products/Release
           zip -r "$GITHUB_WORKSPACE/uncensored-local-ai-macos.zip" *.app
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: macos-bundle
           path: uncensored-local-ai-macos.zip
