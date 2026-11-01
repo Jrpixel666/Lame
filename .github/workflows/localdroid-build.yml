@@ -19,6 +19,9 @@ jobs:
     defaults:
       run:
         working-directory: LocalDroid
+    env:
+      ANDROID_HOME: /opt/android-sdk
+      ANDROID_SDK_ROOT: /opt/android-sdk
     steps:
       - uses: actions/checkout@v4
 
@@ -27,10 +30,17 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Install NDK and CMake
-        run: sdkmanager "ndk;27.0.12077973" "cmake;3.22.1"
+      # android-actions/setup-android@v3 fails trying to install the long-removed
+      # legacy "tools" package, so set up cmdline-tools by hand instead.
+      - name: Install Android SDK (cmdline-tools, platform, NDK, CMake)
+        run: |
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          curl -sS -L -o /tmp/cmdline-tools.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+          unzip -q /tmp/cmdline-tools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+          mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" --licenses > /dev/null
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" "platforms;android-34" "build-tools;34.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
 
       - uses: gradle/actions/setup-gradle@v4
         with:
