@@ -28,7 +28,7 @@ plugins {
     // AGP 8.13.2 calls a Gradle-internal API removed in Gradle 9.6. Kotlin
     // 2.4.21 is compatible across this whole range per kotlinlang.org's
     // own matrix.
-    id("com.android.application") version "8.13.2" apply false
+    id("com.android.application") version "9.5.1" apply false
     id("org.jetbrains.kotlin.android") version "2.4.21" apply false
 }
 
